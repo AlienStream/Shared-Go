@@ -1,4 +1,4 @@
-package Shared-Go
+package Shared
 
 import (
 	"time"
@@ -12,8 +12,8 @@ type Source struct {
 	Importance int
 	Url string
 	Thumbnail string
-	Updated_at time.Date
-	Created_at time.Date 
+	Updated_at time.Time
+	Created_at time.Time 
 }
 
 type Post struct {
