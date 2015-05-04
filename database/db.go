@@ -1,4 +1,4 @@
-package Shared
+package database
 
 import (
 	"github.com/ziutek/mymysql/mysql"
@@ -6,12 +6,12 @@ import (
 	//sq "github.com/lann/squirrel"
 )
 
-const database = "alien";
+const database = "homestead";
 const host = "127.0.0.1:33060";
 const user = "homestead";
 const password = "secret";
 
-func getDBConnection() mysql.Conn {
+func GetDBConnection() mysql.Conn {
 	db := mysql.New("tcp", "", host, user, password, database)
 	err := db.Connect()
     	if err != nil {
