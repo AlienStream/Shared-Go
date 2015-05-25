@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"fmt"
 	db "github.com/AlienStream/Shared-Go/database"
 	mysql "github.com/ziutek/mymysql/mysql"
@@ -33,29 +34,71 @@ func AllPosts() []Post {
 	return RowsToPosts(rows)
 }
 
-func (p Post) Save() {
-	// Check if post already exists
-	rows, _, err := db.Con.Query("select * from posts where `source_id`=%d and `embed_url` = '%s'", p.Source_id, p.Embed_url)
+func (p Post) FromId(Id int) (Post, error) {
+	rows, _, err := db.Con.Query("select * from posts where `id`=%s", Id)
 	if err != nil {
-		panic(err)
+		return nil, errors.New("Error When Querying the database")
 	}
 
 	if len(rows) == 0 {
-		fmt.Printf("Inserting New Post %s \n", p.Title)
-		stmt, err := db.Con.Prepare("insert into posts (`title`, `number_of_comments`, `permalink`, `thumbnail`, `likes`, `dislikes`, `submitter`, `source_id`, `is_new`, `embed_url`, `posted_at`, `created_at`, `updated_at`) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
-		if err != nil {
-			panic(err)
-		}
-		stmt.Exec(p.Title, p.Number_of_comments, p.Permalink, p.Thumbnail, p.Likes, p.Dislikes, p.Submitter, p.Source_id, true, p.Embed_url, p.Posted_at, time.Now(), time.Now())
-	} else {
-		fmt.Printf("Updating Post %s \n", p.Title)
-		stmt, err := db.Con.Prepare("update posts set `title`=?, `number_of_comments`=?, `permalink`=?, `thumbnail`=?, `likes`=?, `dislikes`=?, `submitter`=?, `source_id`=?, `embed_url`=?, `posted_at`=?, `updated_at`=? where `id`=?")
-		if err != nil {
-			panic(err)
-		}
-		stmt.Exec(p.Title, p.Number_of_comments, p.Permalink, p.Thumbnail, p.Likes, p.Dislikes, p.Submitter, p.Source_id, p.Embed_url, p.Posted_at, time.Now(), rows[0].Int(0))
+		return nil, errors.New("Post Not Found For ID %d", Id)
 	}
 
+	return RowsToPosts(rows)[0], nil
+}
+
+func (p Post) IsNew() (bool, int) {
+	rows, _, err := db.Con.Query("select * from posts where `source_id`=%d and `embed_url` = '%s'", p.Source_id, p.Embed_url)
+	if err != nil {
+		panic("Error When Querying the database")
+	}
+
+	if len(rows) == 0 {
+		return true, 0
+	}
+
+	return false, RowsToPosts(rows)[0].Id
+
+}
+
+func (p Post) Insert() error {
+	fmt.Printf("Inserting New Post %s \n", p.Title)
+	stmt, err := db.Con.Prepare("insert into posts (`title`, `number_of_comments`, `permalink`, `thumbnail`, `likes`, `dislikes`, `submitter`, `source_id`, `is_new`, `embed_url`, `posted_at`, `created_at`, `updated_at`) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	if err != nil {
+		return errors.New("Error When Querying the database")
+	}
+	stmt.Exec(p.Title, p.Number_of_comments, p.Permalink, p.Thumbnail, p.Likes, p.Dislikes, p.Submitter, p.Source_id, true, p.Embed_url, p.Posted_at, time.Now(), time.Now())
+
+	return nil
+}
+
+func (p Post) Save() error {
+	fmt.Printf("Updating Post %s \n", p.Title)
+	if p.Id < 1 {
+		return errors.New("Invalid ID for Post")
+	}
+	stmt, err := db.Con.Prepare("update posts set `title`=?, `number_of_comments`=?, `permalink`=?, `thumbnail`=?, `likes`=?, `dislikes`=?, `submitter`=?, `source_id`=?, `embed_url`=?, `posted_at`=?, `updated_at`=? where `id`=?")
+	if err != nil {
+		return errors.New("Error When Querying the database")
+	}
+	stmt.Exec(p.Title, p.Number_of_comments, p.Permalink, p.Thumbnail, p.Likes, p.Dislikes, p.Submitter, p.Source_id, p.Embed_url, p.Posted_at, time.Now(), p.Id)
+
+	return nil
+
+}
+
+func (p Post) Delete() error {
+	fmt.Printf("Deleting Post %s \n", p.Title)
+	if p.Id < 1 {
+		return errors.New("Invalid ID for Post")
+	}
+	stmt, err := db.Con.Prepare("delete from posts where `id`=?")
+	if err != nil {
+		return errors.New("Error When Querying the database")
+	}
+	stmt.Exec(p.Id)
+
+	return nil
 }
 
 func RowsToPosts(rows []mysql.Row) []Post {
