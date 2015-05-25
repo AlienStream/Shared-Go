@@ -16,7 +16,7 @@ type Channel struct {
 	Created_at time.Time
 }
 
-func AllChannels() []Post {
+func AllChannels() []Channel {
 	rows, _, err := db.Con.Query("select * from channels")
 	if err != nil {
 		panic(err)
@@ -28,11 +28,11 @@ func AllChannels() []Post {
 func (c Channel) FromId(Id int) (Channel, error) {
 	rows, _, err := db.Con.Query("select * from channels where `id`=%s", Id)
 	if err != nil {
-		return nil, errors.New("Error When Querying the database")
+		return c, errors.New("Error When Querying the database")
 	}
 
 	if len(rows) == 0 {
-		return nil, errors.New("Channel Not Found For ID %d", Id)
+		return c, errors.New("Channel Not Found")
 	}
 
 	return RowsToChannels(rows)[0], nil

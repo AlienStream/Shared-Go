@@ -21,26 +21,26 @@ type Source struct {
 	Refresh_frequency int
 }
 
-func AllSources() ([]Source, error) {
+func AllSources() []Source {
 	rows, _, err := db.Con.Query("select * from sources")
 	if err != nil {
-		return
+		panic(err)
 	}
 
-	return RowsToSources(rows), nil
+	return RowsToSources(rows)
 }
 
 func (s Source) FromId(Id int) (Source, error) {
 	rows, _, err := db.Con.Query("select * from sources where `id` = '%d'", Id)
 	if err != nil {
-		return nil, errors.New("Error When Querying the database")
+		return s, errors.New("Error When Querying the database")
 	}
 
 	if len(rows) == 0 {
-		return nil, errors.New("Source not found")
+		return s, errors.New("Source not found")
 	}
 
-	return nil, RowsToSources(rows)[0]
+	return RowsToSources(rows)[0], nil
 }
 
 func (s Source) IsNew() (bool, int) {

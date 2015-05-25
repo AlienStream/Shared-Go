@@ -12,13 +12,13 @@ type Artist struct {
 	Id             int
 	Name           string
 	Thumbnail      string
-	Favorite_count string
+	Favorite_count int
 	Play_count     int
 	Updated_at     time.Time
 	Created_at     time.Time
 }
 
-func AllArtists() []Post {
+func AllArtists() []Artist {
 	rows, _, err := db.Con.Query("select * from artists")
 	if err != nil {
 		panic(err)
@@ -30,11 +30,11 @@ func AllArtists() []Post {
 func (a Artist) FromId(Id int) (Artist, error) {
 	rows, _, err := db.Con.Query("select * from artists where `id`=%s", Id)
 	if err != nil {
-		return nil, errors.New("Error When Querying the database")
+		return a, errors.New("Error When Querying the database")
 	}
 
 	if len(rows) == 0 {
-		return nil, errors.New("Artist Not Found For ID %d", Id)
+		return a, errors.New("Artist Not Found")
 	}
 
 	return RowsToArtists(rows)[0], nil
@@ -82,7 +82,7 @@ func (a Artist) Save() error {
 
 func (a Artist) Delete() error {
 	fmt.Printf("Deleting Artist %s \n", a.Name)
-	if p.Id < 1 {
+	if a.Id < 1 {
 		return errors.New("Invalid ID for Artist")
 	}
 	stmt, err := db.Con.Prepare("delete from artists where `id`=?")
@@ -94,7 +94,7 @@ func (a Artist) Delete() error {
 	return nil
 }
 
-func RowsToArtists(rows []mysql.Row) []Post {
+func RowsToArtists(rows []mysql.Row) []Artist {
 	var artists = []Artist{}
 	for _, row := range rows {
 		artists = append(artists, Artist{}.FromRow(row))

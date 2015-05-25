@@ -24,20 +24,20 @@ func AllEmbeddables() []Embeddable {
 		panic(err)
 	}
 
-	return RowsToEmbeddable(rows)
+	return RowsToEmbeddables(rows)
 }
 
 func (e Embeddable) FromId(Id int) (Embeddable, error) {
 	rows, _, err := db.Con.Query("select * from embeddables where `id`=%s", Id)
 	if err != nil {
-		return nil, errors.New("Error When Querying the database")
+		return e, errors.New("Error When Querying the database")
 	}
 
 	if len(rows) == 0 {
-		return nil, errors.New("Embeddable Not Found For ID %d", Id)
+		return e, errors.New("Embeddable Not Found")
 	}
 
-	return RowsToPosts(rows)[0], nil
+	return RowsToEmbeddables(rows)[0], nil
 }
 
 func (e Embeddable) IsNew() (bool, int) {
@@ -50,7 +50,7 @@ func (e Embeddable) IsNew() (bool, int) {
 		return true, 0
 	}
 
-	return false, RowsToEmbedables(rows)[0].Id
+	return false, RowsToEmbeddables(rows)[0].Id
 
 }
 

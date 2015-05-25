@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"fmt"
 	db "github.com/AlienStream/Shared-Go/database"
 	mysql "github.com/ziutek/mymysql/mysql"
@@ -19,26 +20,26 @@ type Track struct {
 	Created_at     time.Time
 }
 
-func AllTracks() ([]Track, error) {
+func AllTracks() []Track {
 	rows, _, err := db.Con.Query("select * from tracks")
 	if err != nil {
-		return
+		panic(err)
 	}
 
-	return RowsToTracks(rows), nil
+	return RowsToTracks(rows)
 }
 
-func (t Track) FromId(Id int) (Source, error) {
+func (t Track) FromId(Id int) (Track, error) {
 	rows, _, err := db.Con.Query("select * from tracks where `id` = '%d'", Id)
 	if err != nil {
-		return nil, errors.New("Error When Querying the database")
+		return t, errors.New("Error When Querying the database")
 	}
 
 	if len(rows) == 0 {
-		return nil, errors.New("Track not found")
+		return t, errors.New("Track not found")
 	}
 
-	return nil, RowsToTracks(rows)[0]
+	return RowsToTracks(rows)[0], nil
 }
 
 func (t Track) Insert() error {
@@ -46,7 +47,7 @@ func (t Track) Insert() error {
 
 	stmt, err := db.Con.Prepare("insert into tracks (`title`, `rank`, `thumbnail`, `favorite_count`, `play_count`, `artist_id`, `created_at`, `updated_at`) values (?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
-		return nil, errors.New("Error Querying the Database")
+		return errors.New("Error Querying the Database")
 	}
 	stmt.Exec(t.Title, t.Rank, t.Thumbnail, 0, 0, t.Artist_id, time.Now(), time.Now())
 

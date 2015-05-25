@@ -37,11 +37,11 @@ func AllPosts() []Post {
 func (p Post) FromId(Id int) (Post, error) {
 	rows, _, err := db.Con.Query("select * from posts where `id`=%s", Id)
 	if err != nil {
-		return nil, errors.New("Error When Querying the database")
+		return p, errors.New("Error When Querying the database")
 	}
 
 	if len(rows) == 0 {
-		return nil, errors.New("Post Not Found For ID %d", Id)
+		return p, errors.New("Post Not Found")
 	}
 
 	return RowsToPosts(rows)[0], nil
