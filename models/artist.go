@@ -28,7 +28,7 @@ func AllArtists() []Artist {
 }
 
 func (a Artist) FromId(Id int) (Artist, error) {
-	rows, _, err := db.Con.Query("select * from artists where `id`=%s", Id)
+	rows, _, err := db.Con.Query("select * from artists where `id`=?", Id)
 	if err != nil {
 		return a, errors.New("Error When Querying the database")
 	}
@@ -40,22 +40,40 @@ func (a Artist) FromId(Id int) (Artist, error) {
 	return RowsToArtists(rows)[0], nil
 }
 
-func (a Artist) IsNew() (bool, int) {
-	rows, _, err := db.Con.Query("select * from artists where `name` = '%s'", a.Name)
+func (a Artist) FromName(Name string) (Artist, error) {
+	rows, _, err := db.Con.Query("select * from artists where `name`='%s'", db.Con.Escape(Name))
 	if err != nil {
-		panic("Error When Querying the database")
+		return a, errors.New("Error When Querying the database")
 	}
 
 	if len(rows) == 0 {
-		return true, 0
+		return a, errors.New("Artist Not Found")
 	}
 
-	return false, RowsToArtists(rows)[0].Id
+	return RowsToArtists(rows)[0], nil
+}
+
+func (a Artist) IsNew() bool {
+	rows, _, err := db.Con.Query("select * from artists where `name`='%s'", db.Con.Escape(a.Name))
+	if err != nil {
+		panic(err)
+	}
+
+	if len(rows) == 0 {
+		return true
+	}
+
+	return false
 
 }
 
 func (a Artist) Insert() error {
 	fmt.Printf("Inserting New Artist %s \n", a.Name)
+
+	if a.Name == "" {
+		return errors.New("Invalid artist Name")
+	}
+
 	stmt, err := db.Con.Prepare("insert into artists (`name`, `thumbnail`, `favorite_count`, `play_count`, `created_at`, `updated_at`) values (?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		return errors.New("Error When Querying the database")

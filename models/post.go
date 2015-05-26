@@ -34,8 +34,17 @@ func AllPosts() []Post {
 	return RowsToPosts(rows)
 }
 
+func NewPosts() []Post {
+	rows, _, err := db.Con.Query("select * from posts where `is_new` = 1")
+	if err != nil {
+		panic(err)
+	}
+
+	return RowsToPosts(rows)
+}
+
 func (p Post) FromId(Id int) (Post, error) {
-	rows, _, err := db.Con.Query("select * from posts where `id`=%s", Id)
+	rows, _, err := db.Con.Query("select * from posts where `id`=?", Id)
 	if err != nil {
 		return p, errors.New("Error When Querying the database")
 	}
@@ -48,7 +57,7 @@ func (p Post) FromId(Id int) (Post, error) {
 }
 
 func (p Post) IsNew() (bool, int) {
-	rows, _, err := db.Con.Query("select * from posts where `source_id`=%d and `embed_url` = '%s'", p.Source_id, p.Embed_url)
+	rows, _, err := db.Con.Query("select * from posts where `source_id`=? and `embed_url`=?", p.Source_id, db.Con.Escape(p.Embed_url))
 	if err != nil {
 		panic("Error When Querying the database")
 	}

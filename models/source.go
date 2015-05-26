@@ -31,7 +31,7 @@ func AllSources() []Source {
 }
 
 func (s Source) FromId(Id int) (Source, error) {
-	rows, _, err := db.Con.Query("select * from sources where `id` = '%d'", Id)
+	rows, _, err := db.Con.Query("select * from sources where `id` = %d", Id)
 	if err != nil {
 		return s, errors.New("Error When Querying the database")
 	}
@@ -43,17 +43,30 @@ func (s Source) FromId(Id int) (Source, error) {
 	return RowsToSources(rows)[0], nil
 }
 
-func (s Source) IsNew() (bool, int) {
-	rows, _, err := db.Con.Query("select * from sources where `title` = '%s'", s.Title)
+func (s Source) FromTitle(Title string) (Source, error) {
+	rows, _, err := db.Con.Query("select * from sources where `title` = '%s'", db.Con.Escape(Title))
+	if err != nil {
+		return s, errors.New("Error When Querying the database")
+	}
+
+	if len(rows) == 0 {
+		return s, errors.New("Source not found")
+	}
+
+	return RowsToSources(rows)[0], nil
+}
+
+func (s Source) IsNew() bool {
+	rows, _, err := db.Con.Query("select * from sources where `title` = '%s'", db.Con.Escape(s.Title))
 	if err != nil {
 		panic("Error When Querying the database")
 	}
 
 	if len(rows) == 0 {
-		return true, 0
+		return true
 	}
 
-	return false, RowsToSources(rows)[0].Id
+	return false
 }
 
 func (s Source) Insert() error {
@@ -74,6 +87,11 @@ func (s Source) Save() error {
 	if s.Id < 1 {
 		return errors.New("Invalid ID for Source")
 	}
+
+	if s.Title == "" {
+		return errors.New("Invalid Source Title")
+	}
+
 	stmt, err := db.Con.Prepare("update sources set `title`=?, `description`=?, `type`=?, `importance`=?, `url`=?, `thumbnail`=?, `updated_at`=?, `refresh_frequency`=? where `id`=?")
 	if err != nil {
 		return errors.New("Error When Querying the database")

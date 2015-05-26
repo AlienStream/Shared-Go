@@ -26,7 +26,7 @@ func AllChannels() []Channel {
 }
 
 func (c Channel) FromId(Id int) (Channel, error) {
-	rows, _, err := db.Con.Query("select * from channels where `id`=%s", Id)
+	rows, _, err := db.Con.Query("select * from channels where `id`=%d", Id)
 	if err != nil {
 		return c, errors.New("Error When Querying the database")
 	}
@@ -38,22 +38,40 @@ func (c Channel) FromId(Id int) (Channel, error) {
 	return RowsToChannels(rows)[0], nil
 }
 
-func (c Channel) IsNew() (bool, int) {
-	rows, _, err := db.Con.Query("select * from channels where `url` = '%s'", c.Url)
+func (c Channel) FromUrl(Url string) (Channel, error) {
+	rows, _, err := db.Con.Query("select * from channels where `url`='%s'", db.Con.Escape(Url))
+	if err != nil {
+		return c, errors.New("Error When Querying the database")
+	}
+
+	if len(rows) == 0 {
+		return c, errors.New("Channel Not Found")
+	}
+
+	return RowsToChannels(rows)[0], nil
+}
+
+func (c Channel) IsNew() bool {
+	rows, _, err := db.Con.Query("select * from channels where `url`='%s'", db.Con.Escape(c.Url))
 	if err != nil {
 		panic("Error When Querying the database")
 	}
 
 	if len(rows) == 0 {
-		return true, 0
+		return true
 	}
 
-	return false, RowsToChannels(rows)[0].Id
+	return false
 
 }
 
 func (c Channel) Insert() error {
 	fmt.Printf("Inserting New Channel %s \n", c.Url)
+
+	if c.Url == "" {
+		return errors.New("Invalid channel URL")
+	}
+
 	stmt, err := db.Con.Prepare("insert into channels (`url`, `artist_id`, `created_at`, `updated_at`) values (?, ?, ?, ?)")
 	if err != nil {
 		return errors.New("Error When Querying the database")
