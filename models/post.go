@@ -44,7 +44,7 @@ func NewPosts() []Post {
 }
 
 func (p Post) FromId(Id int) (Post, error) {
-	rows, _, err := db.Con.Query("select * from posts where `id`=?", Id)
+	rows, _, err := db.Con.Query("select * from posts where `id`=%d", Id)
 	if err != nil {
 		return p, errors.New("Error When Querying the database")
 	}
@@ -56,18 +56,31 @@ func (p Post) FromId(Id int) (Post, error) {
 	return RowsToPosts(rows)[0], nil
 }
 
-func (p Post) IsNew() (bool, int) {
-	rows, _, err := db.Con.Query("select * from posts where `source_id`=? and `embed_url`=?", p.Source_id, db.Con.Escape(p.Embed_url))
+func (p Post) IsNew() bool {
+	rows, _, err := db.Con.Query("select * from posts where `source_id`=%d and `embed_url`='%s'", p.Source_id, db.Con.Escape(p.Embed_url))
 	if err != nil {
-		panic("Error When Querying the database")
+		panic(err)
 	}
 
 	if len(rows) == 0 {
-		return true, 0
+		return true
 	}
 
-	return false, RowsToPosts(rows)[0].Id
+	return false
 
+}
+
+func (p Post) Find(Source_id int, Embed_url string) Post {
+	rows, _, err := db.Con.Query("select * from posts where `source_id`=%d and `embed_url`='%s'", Source_id, db.Con.Escape(Embed_url))
+	if err != nil {
+		panic(err)
+	}
+
+	if len(rows) == 0 {
+		panic("Post Not Found")
+	}
+
+	return RowsToPosts(rows)[0]
 }
 
 func (p Post) Insert() error {
@@ -127,9 +140,9 @@ func (p Post) FromRow(row mysql.Row) Post {
 	p.Likes = row.Int(5)
 	p.Dislikes = row.Int(6)
 	p.Submitter = row.Str(7)
-	p.Source_id = row.Int(8)
-	p.Is_new = row.Bool(9)
-	p.Embed_url = row.Str(10)
+	p.Embed_url = row.Str(8)
+	p.Source_id = row.Int(9)
+	p.Is_new = row.Bool(10)
 	p.Posted_at = row.Localtime(11)
 	p.Updated_at = row.Localtime(12)
 	p.Created_at = row.Localtime(13)
