@@ -16,6 +16,7 @@ type Track struct {
 	Favorite_count int
 	Play_count     int
 	Channel_id     int
+        Content_flags  int
 	Updated_at     time.Time
 	Created_at     time.Time
 }
@@ -75,12 +76,14 @@ func (t Track) Insert() error {
 		return errors.New("Invalid track Title")
 	}
 
-	stmt, err := db.Con.Prepare("insert into tracks (`title`, `rank`, `thumbnail`, `favorite_count`, `play_count`, `channel_id`, `created_at`, `updated_at`) values (?, ?, ?, ?, ?, ?, ?, ?)")
+	stmt, err := db.Con.Prepare("insert into tracks (`title`, `rank`, `thumbnail`, `favorite_count`, `play_count`, `channel_id`, `content_flags`, `created_at`, `updated_at`) values (?, ?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
-		return errors.New("Error Querying the Database")
+                panic(err);
 	}
-	stmt.Exec(t.Title, t.Rank, t.Thumbnail, 0, 0, t.Channel_id, time.Now(), time.Now())
-
+	_, _, err = stmt.Exec(t.Title, t.Rank, t.Thumbnail, 0, 0, t.Channel_id, 0, time.Now(), time.Now())
+	if err != nil {
+                panic(err);
+        }
 	return nil
 }
 
@@ -90,11 +93,11 @@ func (t Track) Save() error {
 	if t.Id < 1 {
 		return errors.New("Invalid ID for Track")
 	}
-	stmt, err := db.Con.Prepare("update tracks set `title`=?, `rank`=?, `thumbnail`=?, `favorite_count`=?, `play_count`=?, `channel_id`=?, `updated_at`=? where `id`=?")
+	stmt, err := db.Con.Prepare("update tracks set `title`=?, `rank`=?, `thumbnail`=?, `favorite_count`=?, `play_count`=?, `channel_id`=?, `content_flags`=?, `updated_at`=? where `id`=?")
 	if err != nil {
 		panic(err)
 	}
-	stmt.Exec(t.Title, t.Rank, t.Thumbnail, t.Favorite_count, t.Play_count, t.Channel_id, time.Now(), t.Id)
+	stmt.Exec(t.Title, t.Rank, t.Thumbnail, t.Favorite_count, t.Play_count, t.Channel_id, t.Content_flags, time.Now(), t.Id)
 
 	return nil
 }
@@ -153,7 +156,8 @@ func (t Track) FromRow(row mysql.Row) Track {
 	t.Favorite_count = row.Int(4)
 	t.Play_count = row.Int(5)
 	t.Channel_id = row.Int(6)
-	t.Updated_at = row.Localtime(7)
-	t.Created_at = row.Localtime(8)
+	t.Content_flags = row.Int(7)
+	t.Updated_at = row.Localtime(8)
+	t.Created_at = row.Localtime(9)
 	return t
 }
