@@ -10,7 +10,7 @@ import (
 var Con *autorc.Conn
 
 func init() {
-	var database string = os.Getenv("DB_NAME") 
+	var database string = os.Getenv("DB_DATABASE") 
 	if database == "" {
 		database = "homestead"
 	}
@@ -20,7 +20,7 @@ func init() {
 		host = "127.0.0.1:33060"
 	}
 
-	var user string = os.Getenv("DB_USER")
+	var user string = os.Getenv("DB_USERNAME")
 	if user == "" {
 		 user = "homestead"
 	}
