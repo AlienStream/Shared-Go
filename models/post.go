@@ -89,6 +89,7 @@ func (p Post) Insert() error {
 	if err != nil {
 		return errors.New("Error When Querying the database")
 	}
+	defer stmt.Close()
 	stmt.Exec(p.Title, p.Number_of_comments, p.Permalink, p.Thumbnail, p.Likes, p.Dislikes, p.Submitter, p.Source_id, true, p.Embed_url, p.Posted_at, time.Now(), time.Now())
 
 	return nil
@@ -99,11 +100,12 @@ func (p Post) Save() error {
 	if p.Id < 1 {
 		return errors.New("Invalid ID for Post")
 	}
-	stmt, err := db.Con.Prepare("update posts set `title`=?, `number_of_comments`=?, `permalink`=?, `thumbnail`=?, `likes`=?, `dislikes`=?, `submitter`=?, `source_id`=?, `embed_url`=?, `posted_at`=?, `updated_at`=? where `id`=?")
+	stmt, err := db.Con.Prepare("update posts set `title`=?, `number_of_comments`=?, `permalink`=?, `thumbnail`=?, `likes`=?, `dislikes`=?, `submitter`=?, `source_id`=?, `embed_url`=?, `posted_at`=?, `updated_at`=?, `is_new`=? where `id`=?")
 	if err != nil {
 		return errors.New("Error When Querying the database")
 	}
-	stmt.Exec(p.Title, p.Number_of_comments, p.Permalink, p.Thumbnail, p.Likes, p.Dislikes, p.Submitter, p.Source_id, p.Embed_url, p.Posted_at, time.Now(), p.Id)
+	defer stmt.Close()
+	stmt.Exec(p.Title, p.Number_of_comments, p.Permalink, p.Thumbnail, p.Likes, p.Dislikes, p.Submitter, p.Source_id, p.Embed_url, p.Posted_at, time.Now(), p.Is_new, p.Id)
 
 	return nil
 
@@ -118,6 +120,7 @@ func (p Post) Delete() error {
 	if err != nil {
 		return errors.New("Error When Querying the database")
 	}
+	defer stmt.Close()
 	stmt.Exec(p.Id)
 
 	return nil

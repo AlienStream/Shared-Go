@@ -78,6 +78,7 @@ func (a Artist) Insert() error {
 	if err != nil {
 		return errors.New("Error When Querying the database")
 	}
+	defer stmt.Close()
 	stmt.Exec(a.Name, a.Thumbnail, a.Favorite_count, a.Play_count, time.Now(), time.Now())
 
 	return nil
@@ -92,6 +93,7 @@ func (a Artist) Save() error {
 	if err != nil {
 		return errors.New("Error When Querying the database")
 	}
+	defer stmt.Close()
 	stmt.Exec(a.Name, a.Thumbnail, a.Favorite_count, a.Play_count, time.Now(), a.Id)
 
 	return nil
@@ -107,6 +109,7 @@ func (a Artist) Delete() error {
 	if err != nil {
 		return errors.New("Error When Querying the database")
 	}
+	defer stmt.Close()
 	stmt.Exec(a.Id)
 
 	return nil
