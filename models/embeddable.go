@@ -77,7 +77,7 @@ func (e Embeddable) Insert() error {
 	if err != nil {
 		return err
 	}
-	defer stmt.Delete()
+	defer stmt.Raw.Delete()
 	_, _, err = stmt.Exec(e.Track_id, e.Url, e.Type, time.Now(), time.Now())
 	if err != nil {
 		return err
