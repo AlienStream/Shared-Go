@@ -81,7 +81,7 @@ func (t Track) Insert() error {
                 panic(err);
 	}
 	defer stmt.Close()
-	_, _, err = stmt.Exec(t.Title, t.Rank, t.Thumbnail, 0, 0, t.Channel_id, 0, time.Now(), time.Now())
+	_, _, err = stmt.Exec(t.Title, t.Rank, t.Thumbnail, 0, 0, t.Channel_id, 0, t.Created_at, time.Now())
 	if err != nil {
                 panic(err);
         }
