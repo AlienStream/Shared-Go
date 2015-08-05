@@ -95,8 +95,9 @@ func (e Embeddable) Save() error {
 	if err != nil {
 		return errors.New("Error When Querying the database")
 	}
-	defer stmt.Close()
 	_, _, err = stmt.Exec(e.Track_id, e.Url, e.Type, time.Now(), e.Id)
+	stmt.Raw.Close()
+	stmt.Raw = nil
 	if err != nil {
 		return err
 	}
@@ -114,8 +115,9 @@ func (e Embeddable) Delete() error {
 	if err != nil {
 		return err
 	}
-	defer stmt.Close()
 	_, _, err = stmt.Exec(e.Id)
+	stmt.Raw.Close()
+	stmt.Raw = nil
 	if err != nil {
 		return err
 	}

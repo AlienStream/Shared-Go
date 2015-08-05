@@ -80,11 +80,12 @@ func (t Track) Insert() error {
 	if err != nil {
                 panic(err);
 	}
-	defer stmt.Close()
 	_, _, err = stmt.Exec(t.Title, t.Rank, t.Thumbnail, 0, 0, t.Channel_id, 0, t.Created_at, time.Now())
+	stmt.Raw.Close()
+	stmt.Raw = nil
 	if err != nil {
-                panic(err);
-        }
+            panic(err);
+    }
 	return nil
 }
 
@@ -98,8 +99,9 @@ func (t Track) Save() error {
 	if err != nil {
 		panic(err)
 	}
-	defer stmt.Close()
 	stmt.Exec(t.Title, t.Rank, t.Thumbnail, t.Favorite_count, t.Play_count, t.Channel_id, t.Content_flags, time.Now(), t.Id)
+	stmt.Raw.Close()
+	stmt.Raw = nil
 
 	return nil
 }
@@ -110,8 +112,9 @@ func (t Track) Delete() error {
 	if err != nil {
 		return errors.New("Error When Querying the database")
 	}
-	defer stmt.Close()
 	stmt.Exec(t.Id)
+	stmt.Raw.Close()
+	stmt.Raw = nil
 
 	return nil
 }
@@ -129,8 +132,9 @@ func CreateTrackSourcePivot(s Source, t Track) {
 		if err != nil {
 			panic("Error Querying the Database")
 		}
-		defer stmt.Close()
 		stmt.Exec(s.Id, t.Id)
+		stmt.Raw.Close()
+		stmt.Raw = nil
 	}
 }
 
@@ -141,8 +145,9 @@ func DeleteTrackSourcePivot(s Source, t Track) {
 	if err != nil {
 		panic("Error Querying the Database")
 	}
-	defer stmt.Close()
 	stmt.Exec(s.Id, t.Id)
+	stmt.Raw.Close()
+	stmt.Raw = nil
 }
 
 func RowsToTracks(rows []mysql.Row) []Track {

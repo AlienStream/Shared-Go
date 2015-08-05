@@ -76,8 +76,9 @@ func (s Source) Insert() error {
 	if err != nil {
 		return errors.New("Error When Querying the database")
 	}
-	defer stmt.Close()
 	stmt.Exec(s.Title, s.Description, s.Type, s.Importance, s.Url, s.Thumbnail, time.Now(), time.Now(), s.Refresh_frequency)
+	stmt.Raw.Close()
+	stmt.Raw = nil
 
 	return nil
 }
@@ -97,8 +98,9 @@ func (s Source) Save() error {
 	if err != nil {
 		return errors.New("Error When Querying the database")
 	}
-	defer stmt.Close()
 	stmt.Exec(s.Title, s.Description, s.Type, s.Importance, s.Url, s.Thumbnail, time.Now(), s.Refresh_frequency, s.Id)
+	stmt.Raw.Close()
+	stmt.Raw = nil
 
 	return nil
 }
@@ -109,8 +111,9 @@ func (s Source) Delete() error {
 	if err != nil {
 		return errors.New("Error When Querying the database")
 	}
-	defer stmt.Close()
 	stmt.Exec(s.Id)
+	stmt.Raw.Close()
+	stmt.Raw = nil
 
 	return nil
 }
