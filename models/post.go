@@ -90,7 +90,7 @@ func (p Post) Insert() error {
 		return errors.New("Error When Querying the database")
 	}
 	stmt.Exec(p.Title, p.Number_of_comments, p.Permalink, p.Thumbnail, p.Likes, p.Dislikes, p.Submitter, p.Source_id, true, p.Embed_url, p.Posted_at, time.Now(), time.Now())
-	stmt.Raw.Close()
+	stmt.Raw.Delete()
 	stmt.Raw = nil
 
 	return nil
@@ -106,7 +106,7 @@ func (p Post) Save() error {
 		return errors.New("Error When Querying the database")
 	}
 	stmt.Exec(p.Title, p.Number_of_comments, p.Permalink, p.Thumbnail, p.Likes, p.Dislikes, p.Submitter, p.Source_id, p.Embed_url, p.Posted_at, time.Now(), p.Is_new, p.Id)
-	stmt.Raw.Close()
+	stmt.Raw.Delete()
 	stmt.Raw = nil
 
 	return nil
@@ -123,7 +123,7 @@ func (p Post) Delete() error {
 		return errors.New("Error When Querying the database")
 	}
 	stmt.Exec(p.Id)
-	stmt.Raw.Close()
+	stmt.Raw.Delete()
 	stmt.Raw = nil
 
 	return nil

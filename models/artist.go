@@ -79,7 +79,7 @@ func (a Artist) Insert() error {
 		return errors.New("Error When Querying the database")
 	}
 	stmt.Exec(a.Name, a.Thumbnail, a.Favorite_count, a.Play_count, time.Now(), time.Now())
-	stmt.Raw.Close()
+	stmt.Raw.Delete()
 	stmt.Raw = nil
 
 	return nil
@@ -95,7 +95,7 @@ func (a Artist) Save() error {
 		return errors.New("Error When Querying the database")
 	}
 	stmt.Exec(a.Name, a.Thumbnail, a.Favorite_count, a.Play_count, time.Now(), a.Id)
-	stmt.Raw.Close()
+	stmt.Raw.Delete()
 	stmt.Raw = nil
 
 	return nil
@@ -112,7 +112,7 @@ func (a Artist) Delete() error {
 		return errors.New("Error When Querying the database")
 	}
 	stmt.Exec(a.Id)
-	stmt.Raw.Close()
+	stmt.Raw.Delete()
 	stmt.Raw = nil
 
 	return nil

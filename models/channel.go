@@ -77,7 +77,7 @@ func (c Channel) Insert() error {
 		return errors.New("Error When Querying the database")
 	}
 	stmt.Exec(c.Url, c.Artist_id, time.Now(), time.Now())
-	stmt.Raw.Close()
+	stmt.Raw.Delete()
 	stmt.Raw = nil
 
 	return nil
@@ -93,7 +93,7 @@ func (c Channel) Save() error {
 		return errors.New("Error When Querying the database")
 	}
 	stmt.Exec(c.Url, c.Artist_id, time.Now(), c.Id)
-	stmt.Raw.Close()
+	stmt.Raw.Delete()
 	stmt.Raw = nil
 
 	return nil
@@ -110,7 +110,7 @@ func (c Channel) Delete() error {
 		return errors.New("Error When Querying the database")
 	}
 	stmt.Exec(c.Id)
-	stmt.Raw.Close()
+	stmt.Raw.Delete()
 	stmt.Raw = nil
 
 	return nil
